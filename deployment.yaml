@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${PROJECT_ITEM_NAME}
+  namespace: ${NAME_SPACE}
+spec:
+  selector:
+    app: ${PROJECT_ITEM_NAME}
+  ports:
+    - protocol: TCP
+      port: 8080
+      name: web
+      targetPort: 8080
+      nodePort: 31003
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${PROJECT_ITEM_NAME}
+  namespace: ${NAME_SPACE}
+  labels:
+    app: ${PROJECT_ITEM_NAME}
+spec:
+  replicas: ${REPLICAS_1}
+  selector:
+    matchLabels:
+      app: ${PROJECT_ITEM_NAME}
+  strategy:
+    type: Recreate          #设置更新策略为删除策略
+  template:
+    metadata:
+      labels:
+        app: ${PROJECT_ITEM_NAME}
+    spec:
+      containers:
+      - name: ${PROJECT_ITEM_NAME}
+        image: registry.cn-hangzhou.aliyuncs.com/${REPO}/${PROJECT_ITEM_NAME}:${IMAGE_ID}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080   #服务端口
+          name: web
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1024Mi
+          requests:
+            cpu: 500m
+            memory: 512Mi
